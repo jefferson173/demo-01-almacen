@@ -1,150 +1,279 @@
 -- Procedimientos para PostgreSQL
 
+
 -- CREAR ALMACEN
 CREATE OR REPLACE FUNCTION CreateWarehouse(
-    type VARCHAR,
-    store_id INT,
-    warehouse_role VARCHAR
+    p_type VARCHAR,
+    p_store_id INT,
+    p_warehouse_role VARCHAR
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que los valores no sean nulos y cumplan con los tipos de datos esperados
+    IF p_type IS NULL OR p_warehouse_role IS NULL THEN
+        RAISE EXCEPTION 'El tipo de almacén y el rol del almacén no pueden ser nulos.';
+    ELSIF LENGTH(p_type) = 0 OR LENGTH(p_warehouse_role) = 0 THEN
+        RAISE EXCEPTION 'El tipo de almacén y el rol del almacén no pueden estar vacíos.';
+    END IF;
+
+    -- Validar que store_id sea un valor positivo
+    IF p_store_id IS NULL OR p_store_id <= 0 THEN
+        RAISE EXCEPTION 'El store_id debe ser un entero positivo.';
+    END IF;
+
+    -- Insertar datos en la tabla Warehouses
     INSERT INTO Warehouses (type, store_id, warehouse_role)
-    VALUES (type, store_id, warehouse_role);
+    VALUES (p_type, p_store_id, p_warehouse_role);
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- OBTENER ALMACEN POR ID
 CREATE OR REPLACE FUNCTION GetWarehouseById(
-    warehouse_id INT
+    p_warehouse_id INT
 ) RETURNS TABLE (warehouse_id INT, type VARCHAR, store_id INT, warehouse_role VARCHAR) AS $$
 BEGIN
+    -- Validar que warehouse_id sea un valor positivo
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El warehouse_id debe ser un entero positivo.';
+    END IF;
+
     RETURN QUERY
     SELECT warehouse_id, type, store_id, warehouse_role
     FROM Warehouses
-    WHERE warehouse_id = warehouse_id;
+    WHERE warehouse_id = p_warehouse_id;
 END;
 $$ LANGUAGE plpgsql;
 
 -- ACTUALIZAR ALMACEN
 CREATE OR REPLACE FUNCTION UpdateWarehouse(
-    warehouse_id INT,
-    type VARCHAR
+    p_warehouse_id INT,
+    p_type VARCHAR
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que warehouse_id sea un valor positivo
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El warehouse_id debe ser un entero positivo.';
+    END IF;
+
+    -- Validar que el tipo no sea nulo o vacío
+    IF p_type IS NULL OR LENGTH(p_type) = 0 THEN
+        RAISE EXCEPTION 'El tipo de almacén no puede ser nulo o estar vacío.';
+    END IF;
+
+    -- Actualizar la tabla Warehouses
     UPDATE Warehouses
-    SET type = type
-    WHERE warehouse_id = warehouse_id;
+    SET type = p_type
+    WHERE warehouse_id = p_warehouse_id;
 END;
 $$ LANGUAGE plpgsql;
 
 -- ELIMINAR ALMACEN
 CREATE OR REPLACE FUNCTION DeleteWarehouse(
-    warehouse_id INT
+    p_warehouse_id INT
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que warehouse_id sea un valor positivo
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El warehouse_id debe ser un entero positivo.';
+    END IF;
+
+    -- Eliminar el almacén
     DELETE FROM Warehouses
-    WHERE warehouse_id = warehouse_id;
+    WHERE warehouse_id = p_warehouse_id;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- CREAR TIENDA
 CREATE OR REPLACE FUNCTION CreateStore(
-    name VARCHAR,
-    location VARCHAR,
-    main_warehouse_id INT,
-    secondary_warehouse_id INT
+    p_name VARCHAR,
+    p_location VARCHAR,
+    p_main_warehouse_id INT,
+    p_secondary_warehouse_id INT
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que los valores no sean nulos y cumplan con los tipos de datos esperados
+    IF p_name IS NULL OR p_location IS NULL THEN
+        RAISE EXCEPTION 'El nombre y la ubicación de la tienda no pueden ser nulos.';
+    ELSIF LENGTH(p_name) = 0 OR LENGTH(p_location) = 0 THEN
+        RAISE EXCEPTION 'El nombre y la ubicación de la tienda no pueden estar vacíos.';
+    END IF;
+
+    -- Validar que los IDs de almacén sean valores positivos
+    IF p_main_warehouse_id IS NULL OR p_main_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El main_warehouse_id debe ser un entero positivo.';
+    END IF;
+    IF p_secondary_warehouse_id IS NULL OR p_secondary_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El secondary_warehouse_id debe ser un entero positivo.';
+    END IF;
+
+    -- Insertar datos en la tabla Stores
     INSERT INTO Stores (name, location, main_warehouse_id, secondary_warehouse_id)
-    VALUES (name, location, main_warehouse_id, secondary_warehouse_id);
+    VALUES (p_name, p_location, p_main_warehouse_id, p_secondary_warehouse_id);
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- OBTENER TIENDA POR ID
 CREATE OR REPLACE FUNCTION GetStoreById(
-    store_id INT
+    p_store_id INT
 ) RETURNS TABLE (store_id INT, name VARCHAR, location VARCHAR, main_warehouse_id INT, secondary_warehouse_id INT) AS $$
 BEGIN
+    -- Validar que store_id sea un valor positivo
+    IF p_store_id IS NULL OR p_store_id <= 0 THEN
+        RAISE EXCEPTION 'El store_id debe ser un entero positivo.';
+    END IF;
+
     RETURN QUERY
     SELECT store_id, name, location, main_warehouse_id, secondary_warehouse_id
     FROM Stores
-    WHERE store_id = store_id;
+    WHERE store_id = p_store_id;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- ACTUALIZAR TIENDA
 CREATE OR REPLACE FUNCTION UpdateStore(
-    store_id INT,
-    name VARCHAR,
-    location VARCHAR,
-    main_warehouse_id INT,
-    secondary_warehouse_id INT
+    p_store_id INT,
+    p_name VARCHAR,
+    p_location VARCHAR,
+    p_main_warehouse_id INT,
+    p_secondary_warehouse_id INT
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que store_id sea un valor positivo
+    IF p_store_id IS NULL OR p_store_id <= 0 THEN
+        RAISE EXCEPTION 'El store_id debe ser un entero positivo.';
+    END IF;
+
+    -- Validar que los valores no sean nulos y cumplan con los tipos de datos esperados
+    IF p_name IS NULL OR p_location IS NULL THEN
+        RAISE EXCEPTION 'El nombre y la ubicación de la tienda no pueden ser nulos.';
+    ELSIF LENGTH(p_name) = 0 OR LENGTH(p_location) = 0 THEN
+        RAISE EXCEPTION 'El nombre y la ubicación de la tienda no pueden estar vacíos.';
+    END IF;
+
+    -- Validar que los IDs de almacén sean valores positivos
+    IF p_main_warehouse_id IS NULL OR p_main_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El main_warehouse_id debe ser un entero positivo.';
+    END IF;
+    IF p_secondary_warehouse_id IS NULL OR p_secondary_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El secondary_warehouse_id debe ser un entero positivo.';
+    END IF;
+
+    -- Actualizar la tabla Stores
     UPDATE Stores
-    SET name = name,
-        location = location,
-        main_warehouse_id = main_warehouse_id,
-        secondary_warehouse_id = secondary_warehouse_id
-    WHERE store_id = store_id;
+    SET name = p_name,
+        location = p_location,
+        main_warehouse_id = p_main_warehouse_id,
+        secondary_warehouse_id = p_secondary_warehouse_id
+    WHERE store_id = p_store_id;
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- ELIMINAR TIENDA
 CREATE OR REPLACE FUNCTION DeleteStore(
-    store_id INT
+    p_store_id INT
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que store_id sea un valor positivo
+    IF p_store_id IS NULL OR p_store_id <= 0 THEN
+        RAISE EXCEPTION 'El store_id debe ser un entero positivo.';
+    END IF;
+
+    -- Eliminar la tienda
     DELETE FROM Stores
-    WHERE store_id = store_id;
+    WHERE store_id = p_store_id;
 END;
 $$ LANGUAGE plpgsql;
 
 -- CREAR UBICACIÓN
 CREATE OR REPLACE FUNCTION CreateLocation(
-    warehouse_id INT,
-    name VARCHAR
+    p_warehouse_id INT,
+    p_name VARCHAR
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que warehouse_id sea un valor positivo
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El warehouse_id debe ser un entero positivo.';
+    END IF;
+
+    -- Validar que el nombre no sea nulo o vacío
+    IF p_name IS NULL OR LENGTH(p_name) = 0 THEN
+        RAISE EXCEPTION 'El nombre de la ubicación no puede ser nulo o estar vacío.';
+    END IF;
+
+    -- Insertar datos en la tabla Locations
     INSERT INTO Locations (warehouse_id, name)
-    VALUES (warehouse_id, name);
+    VALUES (p_warehouse_id, p_name);
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- OBTENER UBICACIÓN POR ID
 CREATE OR REPLACE FUNCTION GetLocationById(
-    location_id INT
+    p_location_id INT
 ) RETURNS TABLE (location_id INT, warehouse_id INT, name VARCHAR) AS $$
 BEGIN
+    -- Validar que location_id sea un valor positivo
+    IF p_location_id IS NULL OR p_location_id <= 0 THEN
+        RAISE EXCEPTION 'El location_id debe ser un entero positivo.';
+    END IF;
+
     RETURN QUERY
     SELECT location_id, warehouse_id, name
     FROM Locations
-    WHERE location_id = location_id;
+    WHERE location_id = p_location_id;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- ACTUALIZAR UBICACIÓN
 CREATE OR REPLACE FUNCTION UpdateLocation(
-    location_id INT,
-    warehouse_id INT,
-    name VARCHAR
+    p_location_id INT,
+    p_warehouse_id INT,
+    p_name VARCHAR
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que location_id y warehouse_id sean valores positivos
+    IF p_location_id IS NULL OR p_location_id <= 0 THEN
+        RAISE EXCEPTION 'El location_id debe ser un entero positivo.';
+    END IF;
+    IF p_warehouse_id IS NULL OR p_warehouse_id <= 0 THEN
+        RAISE EXCEPTION 'El warehouse_id debe ser un entero positivo.';
+    END IF;
+
+    -- Validar que el nombre no sea nulo o vacío
+    IF p_name IS NULL OR LENGTH(p_name) = 0 THEN
+        RAISE EXCEPTION 'El nombre de la ubicación no puede ser nulo o estar vacío.';
+    END IF;
+
+    -- Actualizar la tabla Locations
     UPDATE Locations
-    SET warehouse_id = warehouse_id,
-        name = name
-    WHERE location_id = location_id;
+    SET warehouse_id = p_warehouse_id,
+        name = p_name
+    WHERE location_id = p_location_id;
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- ELIMINAR UBICACIÓN
 CREATE OR REPLACE FUNCTION DeleteLocation(
-    location_id INT
+    p_location_id INT
 ) RETURNS VOID AS $$
 BEGIN
+    -- Validar que location_id sea un valor positivo
+    IF p_location_id IS NULL OR p_location_id <= 0 THEN
+        RAISE EXCEPTION 'El location_id debe ser un entero positivo.';
+    END IF;
+
+    -- Eliminar la ubicación
     DELETE FROM Locations
-    WHERE location_id = location_id;
+    WHERE location_id = p_location_id;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- CREAR SUBUBICACIÓN
 CREATE OR REPLACE FUNCTION CreateSubLocation(
