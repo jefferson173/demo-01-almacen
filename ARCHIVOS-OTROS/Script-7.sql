@@ -391,6 +391,10 @@ CREATE OR REPLACE FUNCTION GetProductById(
     product_id INT
 ) RETURNS TABLE (product_id INT, name VARCHAR, description TEXT, price NUMERIC(10, 2), quantity INT, basket_id INT) AS $$
 BEGIN
+	IF product_id = 1 OR product_id <=0
+		THEN
+            RAISE EXCEPTION 'No hay suficiente stock en la canasta de origen.';
+        END IF;
     RETURN QUERY
     SELECT product_id, name, description, price, quantity, basket_id
     FROM Products
